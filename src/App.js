@@ -1,112 +1,70 @@
 import React, { Component } from 'react';
-import {Formik , Field, ErrorMessage, FieldArray} from "formik";
-import * as Yup from "yup";
+ import ViewUser from './Components/ViewUser';
+import {getUsers,deleteUser} from './Api/User';
 
 class App extends Component {
-  
-  onSubmit = (values) => {
-    console.log(values);
+  state ={
+    users: [],
+    user: {}
   }
 
-  form = (props) => {
-    return <form onSubmit={props.handleSubmit}>
-      <label>Name</label><br />
-      <Field name="name" /><br />
-      <ErrorMessage name="name" /><br />
+  componentDidMount =  () =>{
+     getUsers().then(response =>{
+       this.setState({
+        users: response.data
 
-      <label>Email</label><br />
-      <Field name="email" type="email" /><br />
-      <ErrorMessage name="email" /><br />
+       });
 
-      <label>Type</label><br />
-      <Field name="type" component="select">
-        <option value="1">One</option>
-        <option value="2">Two</option>
-      </Field>
-      <br />
-      <ErrorMessage name="type" /><br />
+     });
+  }
+  setActive = (user) => {
+    this.setState({'user': user});
+  }
+  deleteUser = (user) => {
+    
+    //deleet 
+    deleteUser(user.id)
 
-      <label>Active</label><br />
-      <Field name="active" type="checkbox" /><br />
-      <br />
+      .then(() =>{
+        let users = this.state.users;
+        const index = users.indexOf(user);
+        users.splice(index,1);
+        this.setState({users});
 
-      <label>Category</label><br />
-      <Field name="category" type="radio" value="1" /> 1<br />
-      <Field name="category" type="radio" value="2" /> 2<br />
-      <ErrorMessage name="category" /><br />
-
-      <label>Facebook</label><br />
-      <Field name="social.facebook" /><br />
-      <ErrorMessage name="social.facebook" /><br />
-
-      <label>Twitter</label><br />
-      <Field name="social.twitter" /><br />
-      <ErrorMessage name="social.twitter" /><br />
-
-      <FieldArray 
-        name="friends"
-        render={ arrayHelper => (
-          <div>
-            {props.values.friends.map((item, index)=>(
-              <div key={index}>
-                <Field name={`friends.${index}`} />
-                <button type="button"
-                  onClick={()=>arrayHelper.remove(index)}> - </button>
-                  <ErrorMessage name={`friends.${index}`} /><br />
-              </div>
-            ))}
-            
-            <button type="button"
-                  onClick={()=>arrayHelper.push('')}> + </button>
-          </div>
-        )}
-      />
-
-      <button type="submit">Send</button>
-    </form>
+      })
+      .catch(error=>{
+        alert('errr')
+     })
+   
   }
 
-  schema = ()=>{
-    const schema = Yup.object().shape({
-      name: Yup.string().required(),
-      type: Yup.string().required(),
-      email: Yup.string().required(),
-      category: Yup.string().required(),
-      social: Yup.object().shape({
-        facebook: Yup.string().required('facebook is a required field'),
-        twitter: Yup.string().required('twitter is a required field'),
-      }),
-      friends: Yup.array().of(
-        Yup.string().required('Required '),
-      )
-    });
 
-    return schema;
-  }
 
-  render() {
-    return (
+  render(){
+    return(
       <div className="App">
-        <Formik 
-          initialValues={{
-            name: "bashir",
-            email: "", 
-            type: "",
-            active: false,
-            category: "",
-            social: {
-              facebook: "",
-              twitter: "",
-            },
-            friends: ["Mhmd", "hsam"]
-          }}
-          onSubmit={this.onSubmit}
-          render={this.form}
-          validationSchema={this.schema()}
-          />
+        <ul>
+          {this.state.users.map(user=>
+            <li key={user.id}>
+                {user.name} { ' '}
+                <button onClick={()=>this.setActive(user)}>View</button>
+                <button onClick={()=>this.deleteUser(user)}>Delite</button>
+            </li>
+
+          )}
+
+        </ul>
+        <div>
+          {this.state.user.id > 0 ?
+             <ViewUser user={this.state.user}/>
+            
+           : 'please select a user'}
+        </div>
       </div>
     );
   }
+  
+ 
 }
 
 export default App;
