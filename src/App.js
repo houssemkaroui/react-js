@@ -1,70 +1,30 @@
 import React, { Component } from 'react';
- import ViewUser from './Components/ViewUser';
-import {getUsers,deleteUser} from './Api/User';
+import {BrowserRouter, Route, Link} from "react-router-dom";
+import UsersPage from "./Pages/UsersPage"
+import UserPage from "./Pages/UserPage"
+import EditUserPage from "./Pages/EditUserPage"
+
+const HomePage = ()=><div>Home</div>
+const AboutPage = ()=><div>About</div>
 
 class App extends Component {
-  state ={
-    users: [],
-    user: {}
-  }
+  render() {
+    return (
+      <BrowserRouter>
+        <div className="App">
+          <Link to="/">Home</Link> {" "}
+          <Link to="/users">Users</Link>{" "}
+          <Link to="/about">About</Link>
 
-  componentDidMount =  () =>{
-     getUsers().then(response =>{
-       this.setState({
-        users: response.data
-
-       });
-
-     });
-  }
-  setActive = (user) => {
-    this.setState({'user': user});
-  }
-  deleteUser = (user) => {
-    
-    //deleet 
-    deleteUser(user.id)
-
-      .then(() =>{
-        let users = this.state.users;
-        const index = users.indexOf(user);
-        users.splice(index,1);
-        this.setState({users});
-
-      })
-      .catch(error=>{
-        alert('errr')
-     })
-   
-  }
-
-
-
-  render(){
-    return(
-      <div className="App">
-        <ul>
-          {this.state.users.map(user=>
-            <li key={user.id}>
-                {user.name} { ' '}
-                <button onClick={()=>this.setActive(user)}>View</button>
-                <button onClick={()=>this.deleteUser(user)}>Delite</button>
-            </li>
-
-          )}
-
-        </ul>
-        <div>
-          {this.state.user.id > 0 ?
-             <ViewUser user={this.state.user}/>
-            
-           : 'please select a user'}
+          <Route path="/" exact component={HomePage} />
+          <Route path="/about" component={AboutPage} />
+          <Route path="/users" exact component={UsersPage} />
+          <Route path="/users/:id" exact component={UserPage} />
+          <Route path="/users/edit/:id" exact component={EditUserPage} />
         </div>
-      </div>
+      </BrowserRouter>
     );
   }
-  
- 
 }
 
 export default App;
